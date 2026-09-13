@@ -19,22 +19,20 @@ default_config = {
     "sleepSeconds": 30
 }
 
+"""
+PRIMEIRO PROJETO/SERVICE 1
+1 - recuperar conteúdo das variáveis da request
+2 - baixe um arquivo do alarik para dentro da pasta cache usando rclone
+3 - dentro da pasta cache, crie uma pasta com o ID dessa execução. Esse arquivo será um JSON com uma lista de itens. Cada item é um objeto com várias propriedades.
+4 - Quando terminar, isso vai concluir o primeiro tópico e irá para o segundo tópico.
+5 - O segundo tópico, que é o handler, vai ler o arquivo dentro de cache usando o ID e vai transformar isso em um CSV.
+"""
+
 def handle_task(task: ExternalTask) -> TaskResult:
-
-    # PRIMEIRO PROJETO/SERVICE 1
-
-    # 1 - recuperar conteúdo das variáveis da request
     source_path = task.get_variable("sourcePath")
-    participant = task.get_variable("participant")
-    submission_id = task.get_variable("submissionId")
     execution_id = task.get_process_instance_id()
-
-    # 2 - baixe um arquivo do alarik para dentro da pasta cache usando rclone
-    # 3 - dentro da pasta cache, crie uma pasta com o ID dessa execução. Esse arquivo será um JSON com uma lista de itens. Cada item é um objeto com várias propriedades.
-    run_rclone(["copy", "s3:origin-bucket/lasso-secure/1/", f"/cache/{execution_id}"])
-
-    # 4 - Quando terminar, isso vai concluir o primeiro tópico e irá para o segundo tópico.
-    # 5 - O segundo tópico, que é o handler, vai ler o arquivo dentro de cache usando o ID e vai transformar isso em um CSV.
+    print("Downloading file from AWS bucket")
+    run_rclone(["copy", f"{source_path}", f"/cache/{execution_id}"])
     return task.complete()
 
 def run_rclone(command_args):
