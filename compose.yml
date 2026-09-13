@@ -8,6 +8,7 @@ services:
       DB_PASSWORD: postgres
       WAIT_FOR: cibseven_postgres:5432
       WAIT_FOR_TIMEOUT: "60"
+      CIBSEVEN_WEBCLIENT_MODELER_ENABLED: "true"
     depends_on:
       - postgres
     restart: unless-stopped
@@ -33,9 +34,10 @@ services:
       dockerfile: services/service1/Dockerfile
     container_name: service1
     environment:
+      CIB7_REST_URL: ${CIB7_REST_URL}
       TOPIC: "topic1"
       WORKER_ID: "topic1_worker"
-      RCLONE_CONFIG: "/rclone.conf"
+      RCLONE_CONFIG: "/config/rclone.conf"
       FAILURE_RETRIES: "3"
       FAILURE_RETRY_TIMEOUT_MS: "60000"
     volumes:
