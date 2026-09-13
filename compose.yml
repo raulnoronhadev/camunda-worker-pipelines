@@ -37,7 +37,7 @@ services:
       CIB7_REST_URL: ${CIB7_REST_URL}
       TOPIC: "topic1"
       WORKER_ID: "topic1_worker"
-      RCLONE_CONFIG: "/config/rclone.conf"
+      RCLONE_CONFIG: "/rclone.conf"
       FAILURE_RETRIES: "3"
       FAILURE_RETRY_TIMEOUT_MS: "60000"
     volumes:
