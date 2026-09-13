@@ -1,5 +1,5 @@
 import os
-import pandas as pd
+import subprocess
 from camunda.external_task.external_task import ExternalTask, TaskResult
 from camunda.external_task.external_task_worker import ExternalTaskWorker
 
@@ -20,10 +20,20 @@ default_config = {
 
 def handle_task(task: ExternalTask) -> TaskResult:
     execution_id = task.get_process_instance_id()
-    data_file = pd.read_json(f"/cache/{execution_id}/mock_data.json")
-    print(f"Converting file {execution_id} to CSV...")
-    data_file.to_csv(f"/cache/{execution_id}/mock_data.csv", index=False)
+    csv_path = f"/cache/{execution_id}/mock_data.csv"
+    destination_path = f"landing:secondary-bucket/{execution_id}/"
+    run_rclone(["copy", csv_path, destination_path])
+    print("CSV file uploaded.")
     return task.complete()
+
+def run_rclone(command_args):
+    command = ["rclone"] + command_args
+    try:
+        result = subprocess.run(command, capture_output=True, text=True, check=True)
+        return result.stdout
+    except subprocess.CalledProcessError as e:
+        print(f"Rclone error occurred: {e.stderr}")
+        return None
 
 if __name__ == '__main__':
     ExternalTaskWorker(worker_id=worker_id, base_url=cib7_rest_url, config=default_config).subscribe(topic, handle_task)

@@ -19,15 +19,6 @@ default_config = {
     "sleepSeconds": 30
 }
 
-"""
-PRIMEIRO PROJETO/SERVICE 1
-1 - recuperar conteúdo das variáveis da request
-2 - baixe um arquivo do alarik para dentro da pasta cache usando rclone
-3 - dentro da pasta cache, crie uma pasta com o ID dessa execução. Esse arquivo será um JSON com uma lista de itens. Cada item é um objeto com várias propriedades.
-4 - Quando terminar, isso vai concluir o primeiro tópico e irá para o segundo tópico.
-5 - O segundo tópico, que é o handler, vai ler o arquivo dentro de cache usando o ID e vai transformar isso em um CSV.
-"""
-
 def handle_task(task: ExternalTask) -> TaskResult:
     source_path = task.get_variable("sourcePath")
     execution_id = task.get_process_instance_id()

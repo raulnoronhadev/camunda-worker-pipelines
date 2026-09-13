@@ -61,6 +61,26 @@ services:
       - ./cache:/cache
     restart: unless-stopped
 
+  csv-uploader-service:
+    platform: linux/amd64
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: services/service3/Dockerfile
+    container_name: service3
+    environment:
+      CIB7_REST_URL: ${CIB7_REST_URL}
+      TOPIC: "topic3"
+      WORKER_ID: "topic3_worker"
+      RCLONE_CONFIG: "/rclone.conf"
+      FAILURE_RETRIES: "3"
+      FAILURE_RETRY_TIMEOUT_MS: "60000"
+    volumes:
+      - ./cache:/cache
+      - ./config/rclone.conf:/config/rclone.conf:ro
+    restart: unless-stopped
+
   alarik:
     image: ghcr.io/achtungsoftware/alarik:latest
     restart: unless-stopped
