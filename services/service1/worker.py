@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from camunda.external_task.external_task import ExternalTask, TaskResult
 from camunda.external_task.external_task_worker import ExternalTaskWorker
 
@@ -11,7 +12,6 @@ default_config = {
     "retryTimeout": 5000,
     "sleepSeconds": 30
 }
-
 
 cib7_rest_url = os.environ["CIB7_REST_URL"]
 topic = os.environ["TOPIC"]
@@ -30,6 +30,7 @@ def handle_task(task: ExternalTask) -> TaskResult:
 
     result = task.complete()
 
+    print("Date: ", datetime.now())
     print("task.complete() succesfull!")
     print("====================================")
 
