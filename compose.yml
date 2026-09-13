@@ -1,0 +1,91 @@
+services:
+  cibseven:
+    image: cibseven/cibseven:run-2.2.0
+    environment:
+      DB_DRIVER: org.postgresql.Driver
+      DB_URL: jdbc:postgresql://cibseven_postgres:5432/postgres
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      WAIT_FOR: cibseven_postgres:5432
+      WAIT_FOR_TIMEOUT: "60"
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    ports:
+      - 7080:8080
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: cibseven_postgres
+    environment:
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    ports:
+      - 7432:5432
+
+  s3-fetcher-service:
+    platform: linux/amd64
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: services/service1/Dockerfile
+    container_name: service1
+    environment:
+      TOPIC: "topic1"
+      WORKER_ID: "topic1_worker"
+      RCLONE_CONFIG: "/rclone.conf"
+      FAILURE_RETRIES: "3"
+      FAILURE_RETRY_TIMEOUT_MS: "60000"
+    volumes:
+      - ./cache:/cache
+      - ./config/rclone.conf:/config/rclone.conf:ro
+    restart: unless-stopped
+
+  handler-service:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: services/service2/Dockerfile
+    container_name: service2
+    environment:
+      CIB7_REST_URL: ${CIB7_REST_URL}
+      TOPIC: "topic2"
+      WORKER_ID: "topic2_worker"
+      FAILURE_RETRIES: "3"
+      FAILURE_RETRY_TIMEOUT_MS: "60000"
+    volumes:
+      - ./cache:/cache
+    restart: unless-stopped
+
+  alarik:
+    image: ghcr.io/achtungsoftware/alarik:latest
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - API_BASE_URL=http://localhost:8080
+      - CONSOLE_BASE_URL=http://localhost:3000
+      - ADMIN_USERNAME=alarik
+      - ADMIN_PASSWORD=alarik
+      - JWT=YOUR_SECURE_JWT_KEY
+      - ALLOW_ACCOUNT_CREATION=false
+    volumes:
+      - alarik-storage:/app/Storage
+
+  console:
+    image: ghcr.io/achtungsoftware/alarik-console:latest
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NUXT_PUBLIC_API_BASE_URL=http://localhost:8080
+      - NUXT_PUBLIC_CONSOLE_BASE_URL=http://localhost:3000
+      - NUXT_PUBLIC_ALLOW_ACCOUNT_CREATION=false
+    depends_on:
+      - alarik
+
+volumes:
+  alarik-storage:
+
